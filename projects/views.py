@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseNotFound
 from projects.models import Project
-
+from projects.forms import ProjectForm
 
 def projects(request):
     projects_query = Project.objects.all()
@@ -21,3 +21,9 @@ def project(request, pk):
     return render(request=request,
                 template_name='projects/single-project.html',
                 context={'project': project_query})
+
+
+def createProject(request):
+    form = ProjectForm()
+    context = {'form': form}
+    return render(request, "projects/project_form.html", context)
