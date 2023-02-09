@@ -1,30 +1,23 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseNotFound
-
-projectsList = [
-    {'id': '1', 'title': 'E-commerce Website', 'description': 'Fully functional e-commerce website' },
-    { 'id': '2', 'title': 'Portfolio Website', 'description': 'A personal website to write articles and display work' },
-    {'id': '3', 'title': 'Social Network', 'description': 'An open source project built by the community' }
-]
+from projects.models import Project
 
 
 def projects(request):
-    page = 'projects'
-    number = 10
+    projects_query = Project.objects.all()
     context = {
-        'page': page,
-        'number': number,
-        'projects': projectsList,
+        'projects': projects_query,
     }
     return render(request=request,
                   template_name='projects/projects.html',
                   context=context)
 
 def project(request, pk):
-    projects = {project['id']: project for project in projectsList if project['id'] == pk}
-    if pk not in projects:
+    try:
+        project_query = Project.objects.get(project_id=pk)
+    except Project.DoesNotExist:
         return HttpResponseNotFound()
 
     return render(request=request,
                 template_name='projects/single-project.html',
-                context={'project': projects[pk]})
+                context={'project': project_query})
