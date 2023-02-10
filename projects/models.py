@@ -1,11 +1,13 @@
 from django.db import models
 import uuid
+from users.models import Profile
 
 # Create your models here.
 class Project(models.Model):
     project_id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     created = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=200)
+    owner = models.ForeignKey(Profile, null=True, blank=True, on_delete=models.SET_NULL)
     description = models.TextField(null=True, blank=True)
     featured_image = models.ImageField(default='default.jpg', null=True, blank=True)
     demo_link = models.CharField(max_length=2000, null=True, blank=True)
