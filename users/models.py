@@ -1,8 +1,8 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 import uuid
 
-# Create your models here.
+
 class Profile(models.Model):
     profile_id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     created = models.DateTimeField(auto_now_add=True)
@@ -21,7 +21,7 @@ class Profile(models.Model):
     social_website = models.CharField(max_length=200, blank=True, null=True)
 
     def __str__(self) -> str:
-        return str(self.user.username)
+        return str(self.username)
 
 
 class Skill(models.Model):
