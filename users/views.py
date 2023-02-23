@@ -17,12 +17,10 @@ def profiles(request):
 @login_required(login_url='login')
 def user_profile(request, pk):
     profile_query = Profile.objects.get(profile_id=pk)
-    skills_with_description = profile_query.skill_set.exclude(description__exact="")
-    other_skills = profile_query.skill_set.filter(description="")
     context = {
         'profile': profile_query,
-        'skills_with_description': skills_with_description,
-        'other_skills': other_skills,   
+        'skills_with_description': profile_query.skill_set.exclude(description__exact=""),
+        'other_skills': profile_query.skill_set.filter(description=""),
     }
     return render(request, 'users/user-profile.html', context)
 
@@ -77,3 +75,13 @@ def register_user(request):
         'form': form
     }
     return render(request, 'users/login_register.html', context)
+
+
+@login_required(login_url='login')
+def user_account(request):
+    context = {
+        'profile': request.user.profile,
+        'skills': request.user.profile.skill_set.all(),
+        'projects': request.user.profile.project_set.all(),
+    }
+    return render(request, 'users/account.html', context)
