@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from users.models import Profile
 from django.shortcuts import render, redirect
+from users.forms import CustomUserCreationForm
 
 
 def profiles(request):
@@ -27,6 +28,7 @@ def user_profile(request, pk):
 
 
 def login_user(request):
+    
     if request.user.is_authenticated:
         return redirect('profiles')
 
@@ -45,7 +47,7 @@ def login_user(request):
             else:
                 messages.error(request, 'Username or password is incorrect')
 
-    return render(request, 'users/login_register.html')
+    return render(request, 'users/login_register.html', context={'page': 'login'})
 
 
 def logout_user(request):
@@ -55,5 +57,23 @@ def logout_user(request):
 
 
 def register_user(request):
-    context = {}
+    form = CustomUserCreationForm()
+
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.username = user.username.lower()
+            user.save()
+
+            messages.success(request, 'User account was created!')
+            login(user)
+            return redirect('profiles')
+        else:
+            messages.error(request, 'An error has occurred during registration')
+
+    context = {
+        'page': 'register',
+        'form': form
+    }
     return render(request, 'users/login_register.html', context)
