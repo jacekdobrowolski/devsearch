@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from users.models import Profile
 from users.forms import CustomUserCreationForm, ProfileForm, SkillForm
-from search_profiles import search_profiles
+from users.search_profiles import search_profiles
 
 
 def profiles(request):

@@ -4,12 +4,17 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseNotFound
 from projects.models import Project
 from projects.forms import ProjectForm
+from projects.search_projects import search_projects
 
 
 def projects(request):
-    projects_query = Project.objects.all()
+    search_query = ''
+    if request.GET.get('search_query'):
+        search_query = request.GET.get('search_query')
+
     context = {
-        'projects': projects_query,
+        'projects': search_projects(search_query),
+        'search_query': search_query
     }
     return render(request=request,
                   template_name='projects/projects.html',
