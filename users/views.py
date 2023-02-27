@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from users.models import Profile
 from django.shortcuts import render, redirect
-from users.forms import CustomUserCreationForm
+from users.forms import CustomUserCreationForm, ProfileForm
 
 
 def profiles(request):
@@ -22,7 +22,7 @@ def user_profile(request, pk):
         'skills_with_description': profile_query.skill_set.exclude(description__exact=""),
         'other_skills': profile_query.skill_set.filter(description=""),
     }
-    return render(request, 'users/user-profile.html', context)
+    return render(request, 'users/user_profile.html', context)
 
 
 def login_user(request):
@@ -66,7 +66,7 @@ def register_user(request):
 
             messages.success(request, 'User account was created!')
             login(user)
-            return redirect('profiles')
+            return redirect('edit-profile')
         else:
             messages.error(request, 'An error has occurred during registration')
 
@@ -85,3 +85,14 @@ def user_account(request):
         'projects': request.user.profile.project_set.all(),
     }
     return render(request, 'users/account.html', context)
+
+
+@login_required(login_url='login')
+def edit_account(request):
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
+        if form.is_valid():
+            form.save()
+            return redirect('account')
+    context = {'form': ProfileForm(instance=request.user.profile)}
+    return render(request, 'users/edit_account.html', context)
