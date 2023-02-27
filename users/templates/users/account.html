@@ -84,7 +84,7 @@
 
                     <div class="settings">
                         <h3 class="settings__title">Projects</h3>
-                        <a class="tag tag--pill tag--sub settings__btn tag--lg" href="#">
+                        <a class="tag tag--pill tag--sub settings__btn tag--lg" href="{% url 'create-project' %}">
                             <i class="fa-solid fa-plus fa-pull-left"></i>
                             Add Project
                         </a>
@@ -102,10 +102,10 @@
                                 <p>{{project.description|truncatechars:150}}</p>
                             </td>
                             <td class="settings__tableActions">
-                                <a class="tag tag--pill tag--main settings__btn" href="#">
+                                <a class="tag tag--pill tag--main settings__btn" href="{% url 'update-project' project.project_id %}">
                                     <i class="fa-solid fa-pen-to-square fa-pull-left"></i>
                                     Edit</a>
-                                <a class="tag tag--pill tag--main settings__btn" href="#">
+                                <a class="tag tag--pill tag--main settings__btn" href="{% url 'delete-project' project.project_id%}">
                                     <i class="fa-solid fa-trash fa-pull-left"></i>
                                     Delete</a>
                             </td>
