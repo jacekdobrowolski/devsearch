@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.http import HttpResponseNotFound
 from projects.models import Project
-from projects.forms import ProjectForm
+from projects.forms import ProjectForm, ReviewForm
 from projects.search_projects import search_projects
 from devsearch.paginate import paginate
 
@@ -23,9 +23,6 @@ def projects(request):
         'pages_range': pages
     }
 
-    def test_func(arg):
-        return 'Test string' + str(arg)
-    
     return render(request=request,
                   template_name='projects/projects.html',
                   context=context)
@@ -33,13 +30,27 @@ def projects(request):
 
 def project(request, pk):
     try:
-        project_query = Project.objects.get(project_id=pk)
+        project = Project.objects.get(project_id=pk)
     except Project.DoesNotExist:
         return HttpResponseNotFound()
+    
+    review_form = ReviewForm()
+
+    if request.method == 'POST':
+        review_form = ReviewForm(request.POST)
+        review = review_form.save(commit=False)
+        review.project = project
+        review.owner = request.user.profile
+        review.save()
+        messages.success(request, 'Review saved')
+        project.count_votes()
+        return redirect('project', pk=project.project_id)
 
     return render(request=request,
                 template_name='projects/single-project.html',
-                context={'project': project_query})
+                context={'project': project,
+                         'review_form': review_form,
+                         'reviewed': project.review_set.filter(owner=request.user.profile).count() })
 
 
 @login_required(login_url='login')

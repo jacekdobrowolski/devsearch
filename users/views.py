@@ -46,7 +46,7 @@ def login_user(request):
         return redirect('profiles')
 
     if request.method == 'POST':
-        username = request.POST['username']
+        username = request.POST['username'].lower()
         password = request.POST['password']
 
         try:
@@ -56,7 +56,10 @@ def login_user(request):
         else:
             if user := authenticate(request, username=username, password=password):
                 login(request, user)
-                return redirect('profiles')
+                if 'next' in request.GET:
+                    return redirect(request.GET['next'])
+                else:
+                    return redirect('account')
             else:
                 messages.error(request, 'Username or password is incorrect')
 

@@ -20,8 +20,20 @@ class Project(models.Model):
         return self.title
 
     class Meta:
-        ordering = ['-created']
+        ordering = ['-vote_ratio', '-vote_total', 'title']
 
+    def count_votes(self):
+        up_votes = self.review_set.filter(value='up').count()
+        total_votes = self.review_set.all().count()
+        ratio =  (up_votes / total_votes) * 100
+        self.vote_total = total_votes
+        self.vote_ratio = ratio
+        self.save()
+
+    @property
+    def reviewers(self):
+        return self.review_set.all().values_list('owner__profile_id', flat=True)
+    # TODO is this as terrible as i think it is?
 
 class Review(models.Model):
     VOTE_TYPE = (
@@ -30,13 +42,16 @@ class Review(models.Model):
     )
     review_id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     created = models.DateTimeField(auto_now_add=True)
-    # owner = 
+    owner = models.ForeignKey(Profile, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     body = models.TextField(null=True, blank=True)
     value = models.CharField(max_length=4, choices=VOTE_TYPE)
 
     def __str__(self) -> str:
         return self.value
+    
+    class Meta:
+        unique_together = [['owner', 'project']]
 
 
 class Tag(models.Model):
