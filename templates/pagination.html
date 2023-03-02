@@ -1,0 +1,26 @@
+{% load query_string %}
+{% if page.has_other_pages %}
+<div class="pagination">
+    <ul class="container">
+        {% if page.has_previous %}
+        <li><a href="{% build_query_string query page=page.previous_page_number %}"
+                class="btn">
+                &#10094; Prev
+            </a></li>
+        {% endif %}
+        {% for page_num in pages_range %}
+        <li><a href="{% build_query_string query page=page_num %}" class="btn {% if page_num == page.number %} btn--sub {% endif %}">
+                {{page_num}}
+            </a></li>
+        {% endfor %}
+
+        {% if page.has_next %}
+        <li><a href="{% build_query_string query page=page.next_page_number %}"
+                class="btn ">
+                Next &#10095;
+            </a></li>
+        {% endif %}
+
+    </ul>
+</div>
+{% endif %}

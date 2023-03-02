@@ -1,31 +1,31 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, redirect
 from django.http import HttpResponseNotFound
 from projects.models import Project
 from projects.forms import ProjectForm
 from projects.search_projects import search_projects
+from devsearch.paginate import paginate
 
 
 def projects(request):
     search_query = request.GET.get('search_query') or ''
+    projects = search_projects(search_query)
 
-    page = request.GET.get('page')
-    paginator = Paginator(search_projects(search_query), 6)
-
-    try:
-        paginator.page(page)
-    except PageNotAnInteger:
-        page = 1
-    except EmptyPage:
-        page = paginator.num_pages
-
+    projects, pages = paginate(projects,
+                               elements_on_page=6,
+                               pages_at_once=5,
+                               current_page=request.GET.get('page'))
+    print(f'{pages=}')
     context = {
-        'projects': paginator.page(page),
+        'projects': projects,
         'search_query': search_query,
-        'paginator': paginator,
+        'pages_range': pages
     }
+
+    def test_func(arg):
+        return 'Test string' + str(arg)
+    
     return render(request=request,
                   template_name='projects/projects.html',
                   context=context)

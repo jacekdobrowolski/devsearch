@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect
 from users.models import Profile
 from users.forms import CustomUserCreationForm, ProfileForm, SkillForm
 from users.search_profiles import search_profiles
+from devsearch.paginate import paginate
 
 
 def profiles(request):
@@ -14,9 +15,16 @@ def profiles(request):
     if request.GET.get('search_query'):
         search_query = request.GET.get('search_query')
 
+    profiles = search_profiles(search_query)
+    profiles, pages = paginate(profiles,
+                               elements_on_page=9,
+                               pages_at_once=5,
+                               current_page=request.GET.get('page'))
+
     context = {
-        'profiles': search_profiles(search_query),
-        'search_query': search_query
+        'profiles': profiles,
+        'search_query': search_query,
+        'pages_range': pages,
     }
     return render(request, 'users/profiles.html', context)
 
