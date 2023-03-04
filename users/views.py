@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from users.models import Profile
-from users.forms import CustomUserCreationForm, ProfileForm, SkillForm
+from users.forms import CustomUserCreationForm, ProfileForm, SkillForm, MessageForm, AnonymusMessageForm
 from users.search_profiles import search_profiles
 from devsearch.paginate import paginate
 
@@ -29,7 +29,6 @@ def profiles(request):
     return render(request, 'users/profiles.html', context)
 
 
-@login_required(login_url='login')
 def user_profile(request, pk):
     profile_query = Profile.objects.get(profile_id=pk)
     context = {
@@ -127,7 +126,7 @@ def create_skill(request):
         if form.is_valid():
             skill = form.save(commit=False)
             skill.owner = request.user.profile
-            form.save()
+            skill.save()
             messages.success(request, 'Skill added')
             return redirect('account')
 
@@ -169,3 +168,48 @@ def delete_skill(request, pk):
         'object': skill
     }
     return render(request, 'delete_template.html', context)
+
+
+@login_required(login_url='login')
+def inbox(request):
+    inbox = request.user.profile.messages.all()
+    context = {
+        'inbox': inbox,
+        'unread_count': inbox.filter(is_read=False).count(),
+    }
+    return render(request, 'users/inbox.html', context)
+
+@login_required(login_url='login')
+def message(request, pk):
+    message = request.user.profile.messages.get(message_id=pk)
+    if not message.is_read:
+        message.is_read = True
+        message.save()
+
+    return render(request, 'users/message.html', context={'message': message})
+
+
+def create_message(request, pk):
+    if request.user.is_authenticated:
+        form = MessageForm()
+    else:
+        form = AnonymusMessageForm()
+
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            form = MessageForm(request.POST)
+        else:
+            form = AnonymusMessageForm(request.POST)
+
+        if form.is_valid():
+            message = form.save(commit=False)
+            if request.user.is_authenticated:
+                message.sender = request.user.profile
+
+            message.recipient = Profile.objects.get(profile_id=pk)
+            message.save()
+            messages.success(request, 'Message sent')
+            return redirect('user-profile', pk)
+
+    context={'form_title': "New message", 'form': form }
+    return render(request, 'form_template.html', context)
