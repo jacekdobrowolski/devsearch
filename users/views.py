@@ -82,8 +82,8 @@ def register_user(request):
             user.save()
 
             messages.success(request, 'User account was created!')
-            login(user)
-            return redirect('edit-profile')
+            login(request, user)
+            return redirect('edit-account')
         else:
             messages.error(request, 'An error has occurred during registration')
 
