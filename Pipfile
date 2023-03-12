@@ -9,6 +9,7 @@ pillow = "*"
 whitenoise = "*"
 fontawesomefree = "*"
 djangorestframework = "*"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 
