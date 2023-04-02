@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
 import uuid
 
@@ -25,6 +26,13 @@ class Profile(models.Model):
     
     class Meta:
         ordering = ['name']
+
+    @property
+    def imageURL(self):
+        if self.profile_image:
+            return self.profile_image.url
+        else:
+            return settings.MEDIA_URL + 'profiles/user-default.png'
 
 
 class Skill(models.Model):
