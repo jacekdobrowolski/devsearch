@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 import uuid
 from users.models import Profile
@@ -21,6 +22,14 @@ class Project(models.Model):
 
     class Meta:
         ordering = ['-vote_ratio', '-vote_total', 'title']
+
+    @property
+    def imageURL(self):
+        if self.featured_image:
+            return self.featured_image.url
+        else:
+            return settings.MEDIA_URL + 'default.jpg'
+
 
     def count_votes(self):
         up_votes = self.review_set.filter(value='up').count()
