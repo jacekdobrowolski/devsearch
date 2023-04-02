@@ -4,10 +4,10 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from api.serializers import ProjectSerializer
 from projects.models import Project, Review
-from django.http import HttpResponseBadRequest, HttpResponse
+
 
 @api_view(['GET'])
-def get_routes(response):
+def get_routes(request):
     routes = [
         {'GET': '/api/projects'},
         {'GET': '/api/projects/id'},
@@ -15,7 +15,6 @@ def get_routes(response):
         {'POST': '/api/users/token'},
         {'POST': '/api/users/token/refresh'},
     ]
-
     return Response(routes)
 
 

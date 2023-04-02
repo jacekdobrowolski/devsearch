@@ -10,7 +10,6 @@ class ProjectForm(ModelForm):
             'title',
             'featured_image',
             'description',
-            'tags',
             'demo_link',
             'source_link',
         ]

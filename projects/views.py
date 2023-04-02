@@ -1,8 +1,9 @@
+import re
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.http import HttpResponseNotFound
-from projects.models import Project
+from projects.models import Project, Tag
 from projects.forms import ProjectForm, ReviewForm
 from projects.search_projects import search_projects
 from devsearch.paginate import paginate
@@ -16,7 +17,6 @@ def projects(request):
                                elements_on_page=6,
                                pages_at_once=5,
                                current_page=request.GET.get('page'))
-    print(f'{pages=}')
     context = {
         'projects': projects,
         'search_query': search_query,
@@ -52,6 +52,8 @@ def project(request, pk):
                          'review_form': review_form,
                          'reviewed': project.review_set.filter(owner=request.user.profile).count() })
 
+def parse_tags(tags):
+    return filter(None, re.split(' |,|;|\n|\r', tags))
 
 @login_required(login_url='login')
 def create_project(request):
@@ -62,6 +64,9 @@ def create_project(request):
             project = form.save(commit=False)
             project.owner = request.user.profile
             project.save()
+            for tag in parse_tags(request.POST.get('newtags')):
+                tag, _ = Tag.objects.get_or_create(name=tag)
+                project.tags.add(tag)
             messages.success(request, 'Project created')
             return redirect(projects)
 
@@ -69,7 +74,7 @@ def create_project(request):
         'form_title': 'Create Project',
         'form': form,
     }
-    return render(request, "form_template.html", context)
+    return render(request, "projects/form_project.html", context)
 
 
 @login_required(login_url='login')
@@ -79,7 +84,11 @@ def update_project(request, pk):
     if request.method == 'POST':
         form = ProjectForm(request.POST, request.FILES, instance=project)
         if form.is_valid():
-            form.save()
+            project = form.save()
+            for tag in parse_tags(request.POST.get('newtags')):
+                tag, _ = Tag.objects.get_or_create(name=tag)
+                project.tags.add(tag)
+
             messages.success(request, 'Project updated')
             return redirect('account')
 
@@ -87,7 +96,7 @@ def update_project(request, pk):
         'form_title': 'Update Project',
         'form': form,
     }
-    return render(request, "form_template.html", context)
+    return render(request, "projects/form_project.html", context)
 
 
 @login_required(login_url='login')
